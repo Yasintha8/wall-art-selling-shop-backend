@@ -44,7 +44,7 @@ export function getProducts(req,res){
 }
 
 export async function getProductById(req,res){
-    const productId = req.params.productId
+    const productId = req.params.Id
     const product = await Product.findOne({productId : productId});
     if(product == null){
         res.status(404).json({
