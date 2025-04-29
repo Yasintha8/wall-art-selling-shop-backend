@@ -24,7 +24,6 @@ mongoose.connect(process.env.MONGO_URL).then(
     }
 )
 
-//middle ware ekak vidiyata bodyparser use karanawa
 app.use(bodyParser.json());
 app.use(verifyJWT);
 
