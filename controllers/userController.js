@@ -173,3 +173,15 @@ export async function googleLogin(req,res){
         return;
     }
 }
+
+export function getCurrentUser(req,res){
+    if(req.user == null){
+        res.status(403).json({
+            message : "Please login first"
+        })
+        return;
+    }
+    res.json({
+        user : req.user
+    })
+}
