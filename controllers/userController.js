@@ -1,10 +1,21 @@
 import User from "../models/user.js";
+import OTP from "../models/otp.js"; 
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import axios from "axios";
+import nodemailer from "nodemailer";
 dotenv.config();
  
+const transport = nodemailer.createTransport({
+    service : "gmail",
+    host : "smtp.gmail.com",
+    port : 587,
+    auth : {
+        user : process.env.EMAIL,
+        pass : process.env.PASSWORD
+    }
+})
 export function saveUser(req,res){
 
     if(req.body.role == "admin"){
@@ -184,4 +195,78 @@ export function getCurrentUser(req,res){
     res.json({
         user : req.user
     })
+}
+
+export function sendOTP(req,res){
+    const email = req.body.email;
+    const otp = Math.floor(Math.random() * 10000);
+
+    const message = {
+        from : process.env.EMAIL,
+        to : email,
+        subject : "OTP Verification",
+        text : `Your OTP is ${otp}`
+    }
+
+    const newOtp = new OTP({
+        email : email,
+        otp : otp
+    })
+
+    newOtp.save().then(()=>{
+        console.log("OTP saved successfully");
+    })
+
+    transport.sendMail(message).then(()=>{
+        res.json({
+            message : "OTP sent successfully"
+        })
+    }).catch(()=>{
+        res.status(500).json({
+            message : "OTP not sent"
+        })
+    })
+}
+
+export async function changePassword(req,res){
+    const email = req.body.email;
+    const otp = req.body.otp;
+    const password = req.body.password;
+    try{
+        const lastOTPData = await OTP.findOne({
+            email : email
+        }).sort({createdAt : -1})
+
+        if(lastOTPData == null){
+            res.status(403).json({
+                message : "NO OTP found for this email"
+            })
+            return;
+        }
+
+        if(lastOTPData.otp !== otp){
+           res.status(403).json({
+               message : "Invalid OTP"
+           })
+           return;
+
+        }else{
+            const hashedPassword = bcrypt.hashSync(password , 10);
+            await User.updateOne({
+                email : email
+            }, {
+                password : hashedPassword
+            })
+            await OTP.deleteMany({
+                email : email
+            })
+            res.json({
+                message : "Password changed successfully"
+            })
+        }
+    }catch(e){
+        res.status(500).json({
+            message : "Error Changing Password"
+        })
+    }
 }
