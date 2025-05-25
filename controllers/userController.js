@@ -69,6 +69,57 @@ export function saveUser(req,res){
     })
 }
 
+export async function getAllUsers(req, res) {
+    if (!req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+    }
+
+    try {
+        const users = await User.find({}, '-password'); 
+        res.json(users);
+    } catch (e) {
+        res.status(500).json({ message: "Failed to fetch users" });
+    }
+}
+
+export async function toggleUserStatus(req, res) {
+    const userId = req.params.id;
+
+    if (!req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+    }
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        user.isDisabled = !user.isDisabled;
+        await user.save();
+        res.json({ message: "User status updated", isDisabled: user.isDisabled });
+    } catch (e) {
+        res.status(500).json({ message: "Error updating user status" });
+    }
+}
+
+export async function deleteUser(req, res) {
+    const userId = req.params.userId;
+
+    if (!req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+    }
+
+    try {
+        const deletedUser = await User.findByIdAndDelete(userId);
+        if (!deletedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json({ message: "User deleted successfully" });
+    } catch (e) {
+        res.status(500).json({ message: "Error deleting user" });
+    }
+}
+
 export function loginUser(req,res){
 
     const email = req.body.email;
