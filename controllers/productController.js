@@ -1,31 +1,29 @@
 import Product from "../models/product.js";
 
-export async function createProduct(req,res){
-    if(req.user == null){
-        res.status(403).json({
-            message : "You need to login first"
-        })
-        return;
+export async function createProduct(req, res) {
+    if (!req.user) {
+        return res.status(403).json({ message: "You need to login first" });
     }
 
-    if(req.user.role != "admin"){
-        res.status(403).json({
-            message : "You are not authorized to create a product"
-        })
-        return;
+    if (req.user.role !== "admin") {
+        return res.status(403).json({ message: "You are not authorized to create a product" });
+    }
+
+    const allowedCategories = ["Living Rooms", "Religious", "Kitchen", "Resturant"];
+    const { category } = req.body;
+
+    // Validate category
+    if (!allowedCategories.includes(category)) {
+        return res.status(400).json({ message: `Invalid category. Allowed: ${allowedCategories.join(", ")}` });
     }
 
     const product = new Product(req.body);
 
-    try{
-        await product.save()  // save wenakan ilaga wedeta yanne ne
-        res.json({
-            message: "Product saved successfully"
-        })
-    }catch(err){
-        res.status(500).json({
-            message: "Product not saved"
-        })
+    try {
+        await product.save();
+        res.json({ message: "Product saved successfully" });
+    } catch (err) {
+        res.status(500).json({ message: "Product not saved", error: err.message });
     }
 }
 export function getProducts(req,res){
@@ -147,3 +145,19 @@ export async function getTrendingProducts(req, res) {
   }
 }
 
+//  New: Get products by category
+export async function getProductsByCategory(req, res) {
+    const category = req.params.category;
+    const allowedCategories = ["Living Rooms", "Religious", "Kitchen", "Resturant"];
+
+    if (!allowedCategories.includes(category)) {
+        return res.status(400).json({ message: `Invalid category. Must be one of: ${allowedCategories.join(", ")}` });
+    }
+
+    try {
+        const products = await Product.find({ category });
+        res.json({ products });
+    } catch (err) {
+        res.status(500).json({ message: "Failed to fetch products by category" });
+    }
+}

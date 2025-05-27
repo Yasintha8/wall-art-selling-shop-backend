@@ -1,40 +1,45 @@
 import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema({
-    productId : {
-        type : String,
-        required : true,
-        unique : true
+    productId: {
+        type: String,
+        required: true,
+        unique: true
     },
-    name : {
-        type : String,
-        required : true
+    name: {
+        type: String,
+        required: true
     },
-    altNames : {
-        type : [String],
-        default : [] 
+    altNames: {
+        type: [String],
+        default: []
     },
-    price : {
-        type : Number,
-        required : true
+    price: {
+        type: Number,
+        required: true
     },
-    labeledPrice : {
-        type : Number,
-        required : true
+    labeledPrice: {
+        type: Number,
+        required: true
     },
-    description : {
-        type : String,
-        required : true
+    description: {
+        type: String,
+        required: true
     },
-    images : {
-        type : [String],
-        required : true,
-        default : ["https://brissbella.com/wp-content/uploads/2022/12/pexels-valeriia-miller-3685530.jpg"]
+    images: {
+        type: [String],
+        required: true,
+        default: ["https://brissbella.com/wp-content/uploads/2022/12/pexels-valeriia-miller-3685530.jpg"]
     },
-    stock : {
-        type : Number,
-        required : true
+    stock: {
+        type: Number,
+        required: true
     },
+    category: {
+        type: String,
+        required: true,
+        enum: ["Living Rooms", "Religious", "Kitchen", "Resturant"],
+    }
 })
 
 const Product = mongoose.model("products", productSchema)
