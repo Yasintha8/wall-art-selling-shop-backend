@@ -9,7 +9,7 @@ export async function createProduct(req, res) {
         return res.status(403).json({ message: "You are not authorized to create a product" });
     }
 
-    const allowedCategories = ["Living Rooms", "Religious", "Kitchen", "Resturant"];
+    const allowedCategories = ["Living Room", "Religious", "Kitchen", "Resturant"];
     const { category } = req.body;
 
     // Validate category
@@ -133,7 +133,7 @@ export async function searchProducts(req, res) {
     }
 }
 
-
+//  New: Get trending products
 export async function getTrendingProducts(req, res) {
   try {
     const products = await Product.find({})
@@ -145,19 +145,30 @@ export async function getTrendingProducts(req, res) {
   }
 }
 
+// New: Arrivals - get products Random
+export async function getArrivals(req, res) {
+  try {
+    const products = await Product.aggregate([{ $sample: { size: 4 } }]);
+    res.json({ products });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch arrivals" });
+  }
+}
+
+
 //  New: Get products by category
 export async function getProductsByCategory(req, res) {
-    const category = req.params.category;
-    const allowedCategories = ["Living Rooms", "Religious", "Kitchen", "Resturant"];
+  const category = req.params.category;
+  const allowedCategories = ["Living Room", "Religious", "Kitchen", "Resturant"];
 
-    if (!allowedCategories.includes(category)) {
-        return res.status(400).json({ message: `Invalid category. Must be one of: ${allowedCategories.join(", ")}` });
-    }
+  if (!allowedCategories.includes(category)) {
+    return res.status(400).json({ message: `Invalid category.` });
+  }
 
-    try {
-        const products = await Product.find({ category });
-        res.json({ products });
-    } catch (err) {
-        res.status(500).json({ message: "Failed to fetch products by category" });
-    }
+  try {
+    const products = await Product.find({ category });
+    res.json({ products });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch products by category" });
+  }
 }
