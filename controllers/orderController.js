@@ -111,6 +111,22 @@ export function getOrders(req,res){
     }
 }
 
+//delete order
+export async function deleteOrder(req, res) {
+    try {
+        const orderdelete = await Order.findOneAndDelete({ orderID: req.params._id });
+
+        if (!orderdelete) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        res.json({ message: "Order deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Server error" });
+    }
+}
+
+
 export async function updateOrder(req,res){
     try{
         if(req.user == null){
