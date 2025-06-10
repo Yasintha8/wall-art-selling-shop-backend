@@ -113,8 +113,9 @@ export function getOrders(req,res){
 
 //delete order
 export async function deleteOrder(req, res) {
+    console.log(req.params.id);
     try {
-        const orderdelete = await Order.findOneAndDelete({ orderID: req.params._id });
+        const orderdelete = await Order.findOneAndDelete({ orderID: req.params.id });
 
         if (!orderdelete) {
             return res.status(404).json({ message: "Order not found" });
