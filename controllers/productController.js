@@ -176,7 +176,7 @@ export async function getProductsByCategory(req, res) {
 // Recommended products
 export async function getRecommendedProducts(req, res) {
   try {
-    const products = await Product.aggregate([{ $sample: { size: 12 } }]);
+    const products = await Product.aggregate([{ $sample: { size: 6 } }]);
     res.json({ products });
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch recommended products" });
