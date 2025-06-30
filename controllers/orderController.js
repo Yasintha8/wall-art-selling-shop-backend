@@ -1,77 +1,61 @@
 import Order from "../models/order.js";
 import Product from "../models/product.js";
 
-export async function createOrder(req,res){
-
-    if(req.user == null){
-        res.status(401).json({
-            message : "Unauthorized"
-        })
-        return;
+export async function createOrder(req, res) {
+    if (req.user == null) {
+        return res.status(401).json({ message: "Unauthorized" });
     }
 
     const body = req.body;
     const orderData = {
-        orderID : "",
-        email:req.user.email,
-        name : body.name,
-        address : body.address,
-        phoneNumber : body.phoneNumber,
-        billItems :[],
-        total:0
+        orderID: "",
+        email: req.user.email,
+        name: body.name,
+        address: body.address,
+        phoneNumber: body.phoneNumber,
+        billItems: [],
+        total: 0
+    };
+
+    const lastBills = await Order.find().sort({ date: -1 }).limit(1);
+    if (lastBills.length === 0) {
+        orderData.orderID = "ORD0001";
+    } else {
+        const lastOrderId = lastBills[0].orderID;
+        const lastOrderNumber = parseInt(lastOrderId.replace("ORD", ""));
+        const newOrderNumberStr = (lastOrderNumber + 1).toString().padStart(4, '0');
+        orderData.orderID = "ORD" + newOrderNumberStr;
     }
-    Order.find().sort({
-        date:-1
-    }).limit(1).then(async (lastBills) => {
-        if(lastBills.length == 0){
-            orderData.orderID = "ORD0001";
-        }else{
-            const lastBill = lastBills[0];
-            const lastOrderId = lastBill.orderID;//"ORD0061"
-            const lastOrderNumber = lastOrderId.replace("ORD", "");//"0061"
-            const lastOrderNumberInt = parseInt(lastOrderNumber);//61
-            const newOrderNumberInt = lastOrderNumberInt + 1;//62
-    
-            const newOrderNumberStr = newOrderNumberInt.toString().padStart(4, '0'); //"0062"
-            orderData.orderID = "ORD" + newOrderNumberStr;//"ORD0062"
+
+    for (let i = 0; i < body.billItems.length; i++) {
+        const product = await Product.findOne({ productId: body.billItems[i].productId });
+        if (!product) {
+            return res.status(404).json({ message: `Product with Product ID ${body.billItems[i].productId} not found` });
         }
 
+        const item = body.billItems[i];
 
-        for(let i = 0; i < body.billItems.length; i++){
-            
-            const product = await Product.findOne({ productId : body.billItems[i].productId});
-            if(product == null){
-                res.status(404).json({
-                    message : "Product with Product ID " + body.billItems[i].productId + " not found"
-                })
-                return;
-            }
+        orderData.billItems[i] = {
+            productId: product.productId,
+            productName: product.name,
+            image: product.images[0],
+            quantity: item.quantity,
+            price: product.price,
+            size: item.size || item.selectedSize || null,  
+        };
 
-            orderData.billItems[i] = {
-                productId : product.productId,
-                productName : product.name,
-                image : product.images[0],
-                quantity : body.billItems[i].quantity,
-                price : product.price
-            };
-            orderData.total = orderData.total + product.price * body.billItems[i].quantity
-            
-        }
-    
-        const order = new Order(orderData);
+        orderData.total += product.price * item.quantity;
+    }
 
-    
-        order.save().then(()=>{
-            res.json({
-                message : "Order saved successfully"
-            });
-        }).catch((err)=>{
-            console.log(err);
-            res.status(500).json({
-                message : "Order not saved"
-            });
-        })
-    })
+    const order = new Order(orderData);
+
+    try {
+        await order.save();
+        res.json({ message: "Order saved successfully" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Order not saved" });
+    }
 }
 
 export function getOrders(req,res){
