@@ -22,6 +22,11 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    size: {
+        type: String,
+        required: true,
+        enum: ["Small", "Medium", "Square Medium", "Large", "Square Large", "Extra Large"]
+    },
     description: {
         type: String,
         required: true
