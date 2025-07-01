@@ -38,7 +38,7 @@ const productSchema = new mongoose.Schema({
     category: {
         type: String,
         required: true,
-        enum: ["Living Rooms", "Religious", "Kitchen", "Resturant"],
+        enum: ["Living Room", "Religious", "Kitchen", "Resturant"],
     }
 })
 
