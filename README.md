@@ -56,11 +56,3 @@ Both are maintained in separate GitHub repositories:
 | State     | React Hooks, Context API      |
 
 ---
-
-## 🖥️ Screenshots
-
-<!-- Add your own screenshots here -->
-<!-- ![Home Page](./screenshots/home.png) -->
-<!-- ![Product Page](./screenshots/product.png) -->
-
----
