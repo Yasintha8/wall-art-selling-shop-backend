@@ -1,4 +1,4 @@
-# 🖼️ Wall Art E-commerce Web Application (MERN Stack)
+# Wall Art E-commerce Web Application (MERN Stack)
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![React](https://img.shields.io/badge/React-v18-green.svg)
